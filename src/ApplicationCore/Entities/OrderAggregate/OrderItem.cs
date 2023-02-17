@@ -9,6 +9,14 @@ public class OrderItem : BaseEntity
     #pragma warning disable CS8618 // Required by Entity Framework
     private OrderItem() {}
 
+    public OrderItem(int id, CatalogItemOrdered itemOrdered, decimal unitPrice, int units)
+    {
+        Id = id;
+        ItemOrdered = itemOrdered;
+        UnitPrice = unitPrice;
+        Units = units;
+    }
+
     public OrderItem(CatalogItemOrdered itemOrdered, decimal unitPrice, int units)
     {
         ItemOrdered = itemOrdered;

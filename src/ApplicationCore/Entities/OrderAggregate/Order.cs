@@ -10,6 +10,14 @@ public class Order : BaseEntity, IAggregateRoot
     #pragma warning disable CS8618 // Required by Entity Framework
     private Order() {}
 
+    public Order(int id, string buyerId, Address shipToAddress, List<OrderItem> items)
+    {
+        Id = id;
+        BuyerId = buyerId;
+        ShipToAddress = shipToAddress;
+        _orderItems = items;
+    }
+
     public Order(string buyerId, Address shipToAddress, List<OrderItem> items)
     {
         Guard.Against.NullOrEmpty(buyerId, nameof(buyerId));

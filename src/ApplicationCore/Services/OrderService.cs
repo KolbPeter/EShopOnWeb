@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Ardalis.GuardClauses;
 using Microsoft.eShopWeb.ApplicationCore.Entities;
@@ -6,23 +7,31 @@ using Microsoft.eShopWeb.ApplicationCore.Entities.BasketAggregate;
 using Microsoft.eShopWeb.ApplicationCore.Entities.OrderAggregate;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.ApplicationCore.Specifications;
+using Microsoft.Extensions.Configuration;
 
 namespace Microsoft.eShopWeb.ApplicationCore.Services;
 
 public class OrderService : IOrderService
 {
+    private readonly JsonSerializerOptions _serializerOptions = new() { PropertyNameCaseInsensitive = true };
     private readonly IRepository<Order> _orderRepository;
     private readonly IUriComposer _uriComposer;
+    private readonly IServiceBusQueueService _serviceBusQueueService;
+    private readonly IConfiguration _configuration;
     private readonly IRepository<Basket> _basketRepository;
     private readonly IRepository<CatalogItem> _itemRepository;
 
     public OrderService(IRepository<Basket> basketRepository,
         IRepository<CatalogItem> itemRepository,
         IRepository<Order> orderRepository,
-        IUriComposer uriComposer)
+        IUriComposer uriComposer,
+        IServiceBusQueueService serviceBusQueueService,
+        IConfiguration configuration)
     {
         _orderRepository = orderRepository;
         _uriComposer = uriComposer;
+        _serviceBusQueueService = serviceBusQueueService;
+        _configuration = configuration;
         _basketRepository = basketRepository;
         _itemRepository = itemRepository;
     }
@@ -48,6 +57,13 @@ public class OrderService : IOrderService
 
         var order = new Order(basket.BuyerId, shippingAddress, items);
 
-        await _orderRepository.AddAsync(order);
+        var placedOrder = await _orderRepository.AddAsync(order);
+
+        var orderMessage = JsonSerializer.Serialize(placedOrder, _serializerOptions);
+
+        await _serviceBusQueueService.PushMessage(
+            connectionString: _configuration["ServiceBusConnectionString:ServiceBusConnectionString"],
+            queueName: _configuration["ServiceBusConnectionString:ServiceBusQueueName"],
+            message: orderMessage);
     }
 }
