@@ -17,7 +17,6 @@ internal class Configurator
     public IConfigurationBuilder Configure(IConfigurationBuilder builder)
     {
         builder.AddJsonFile("appsettings.json", false, true);
-        
         return builder;
     }
 }

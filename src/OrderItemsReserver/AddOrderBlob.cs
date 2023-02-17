@@ -18,7 +18,8 @@ namespace OrderItemsReserver
         }
 
         [Function("AddOrderBlob")]
-        public async Task Run([ServiceBusTrigger("neworder")] string order)
+        public async Task Run(
+            [ServiceBusTrigger("neworder")] string order)
         {
             _logger.LogInformation($"ServiceBus queue trigger function processed message: {order}");
 

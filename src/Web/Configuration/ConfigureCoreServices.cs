@@ -22,6 +22,10 @@ public static class ConfigureCoreServices
         services.AddScoped(typeof(IAppLogger<>), typeof(LoggerAdapter<>));
         services.AddTransient<IEmailSender, EmailSender>();
         services.AddSingleton<IServiceBusQueueService, ServiceBusQueueService>();
+        services.AddSingleton<IRequestService>(
+            new RequestService(
+                deliveryProcessorUrl: configuration["DeliveryProcessorBaseUrl"],
+                deaultHeaders: configuration.GetSection("RequestHeaders").Get<IDictionary<string, string>>()));
 
         return services;
     }
