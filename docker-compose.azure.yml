@@ -1,0 +1,10 @@
+version: '3.4'
+
+services:
+  eshoppublicapi:
+    image: esowcontainrereg.azurecr.io/eshoponweb-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:80
+    ports:
+      - "5200:80"
